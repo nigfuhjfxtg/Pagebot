@@ -1,5 +1,5 @@
 module.exports.config = {
-  name: "get", // Command Name (IMPORTANT)
+  name: "ايدي", // Command Name (IMPORTANT)
   author: "Yan Maglinte", // The author of this script
   version: "1.0", // If you want to update your own version, please update this.
   category: "Utility", // Change this to the desired category, helpful for help.js command
