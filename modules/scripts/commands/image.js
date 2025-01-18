@@ -1,11 +1,11 @@
 module.exports.config = {
-  name: "image",
+  name: "صور",
   author: "Yan Maglinte",
   version: "1.0",
   category: "Utility",
   description: "Sends an attachment.",
   adminOnly: false, 
-  usePrefix: true,
+  usePrefix: false,
   cooldown: 5, // Cooldown time in seconds
 };
 
