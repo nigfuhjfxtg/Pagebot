@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports.config = {
-  name: "help",
+  name: "اوامر",
   author: "Yan Maglinte",
   version: "1.0",
   category: "Utility",
