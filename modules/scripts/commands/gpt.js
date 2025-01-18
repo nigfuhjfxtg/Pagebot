@@ -1,7 +1,7 @@
 const { gpt } = require("gpti");
 
 module.exports.config = {
-  name: "صخر",
+  name: "",
   author: "Yan Maglinte",
   version: "1.0",
   category: "AI",
