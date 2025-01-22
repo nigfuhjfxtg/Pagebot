@@ -1,5 +1,7 @@
 const { gpt } = require("gpti");
-const axios = require("axios");
+
+// مصفوفة لتخزين المحادثات
+const conversations = {};
 
 module.exports.config = {
   name: "صخر",
@@ -13,46 +15,39 @@ module.exports.config = {
 };
 
 module.exports.run = async function ({ event, args, api }) {
-  if (event.type === "message") {
-    let prompt = args.join(" ");
+  const userId = event.sender.id; // التعرف على المستخدم من الـ ID
+  const userMessage = args.join(" "); // رسالة المستخدم
 
-    // إعداد البيانات لطلب Blackbox API
-    const url = "https://www.blackbox.ai/api/chat";
-    const data = {
-      id: "BNAU61V",
-      messages: [{ id: "BNAU61V", content: prompt, role: "user" }],
-      agentMode: {},
-      validated: "00f37b34-a166-4efb-bce5-1312d87f2f94",
-    };
+  // التأكد من وجود سجل المحادثة للمستخدم
+  if (!conversations[userId]) {
+    conversations[userId] = []; // إنشاء سجل جديد للمستخدم
+  }
 
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "*/*",
-      Origin: "https://www.blackbox.ai",
-      Referer: "https://www.blackbox.ai/",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-    };
+  // إضافة رسالة المستخدم إلى المحادثة
+  conversations[userId].push({ role: "user", content: userMessage });
 
-    try {
-      // إرسال الطلب إلى Blackbox API
-      const response = await axios.post(url, data, { headers });
+  try {
+    // إرسال الطلب إلى GPT
+    const data = await gpt.v1({
+      messages: conversations[userId], // استخدام المحادثة الكاملة
+      prompt: userMessage,
+      model: "GPT-4",
+      markdown: false,
+    });
 
-      // التحقق من الاستجابة
-      if (response && response.data) {
-        api.sendMessage(response.data, event.sender.id).catch((err) => {
-          console.error("Error sending message:", err);
-        });
-      } else {
-        api.sendMessage("لم يتم استلام رد من الخادم.", event.sender.id).catch((err) => {
-          console.error("Error sending message:", err);
-        });
-      }
-    } catch (error) {
-      console.error("Error during API request:", error.response ? error.response.data : error.message);
-      api.sendMessage("حدث خطأ أثناء معالجة الطلب. يرجى المحاولة لاحقًا.", event.sender.id).catch((err) => {
-        console.error("Error sending error message:", err);
-      });
-    }
+    const botResponse = data.gpt; // رد الروبوت
+
+    // إضافة رد الروبوت إلى المحادثة
+    conversations[userId].push({ role: "assistant", content: botResponse });
+
+    // إرسال رد الروبوت إلى المستخدم
+    api.sendMessage(botResponse, userId).catch((err) => {
+      console.error(err);
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    api.sendMessage("حدث خطأ أثناء معالجة الطلب. حاول مرة أخرى لاحقًا.", userId).catch((err) => {
+      console.error(err);
+    });
   }
 };
