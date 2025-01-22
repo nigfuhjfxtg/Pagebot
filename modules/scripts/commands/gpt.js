@@ -38,15 +38,20 @@ module.exports.run = async function ({ event, args, api }) {
       // إرسال الطلب إلى Blackbox API
       const response = await axios.post(url, data, { headers });
 
-      // إرسال الرد إلى المستخدم
-      api.sendMessage(response.data, event.sender.id).catch((err) => {
-        console.error(err);
-      });
+      // التحقق من الاستجابة
+      if (response && response.data) {
+        api.sendMessage(response.data, event.sender.id).catch((err) => {
+          console.error("Error sending message:", err);
+        });
+      } else {
+        api.sendMessage("لم يتم استلام رد من الخادم.", event.sender.id).catch((err) => {
+          console.error("Error sending message:", err);
+        });
+      }
     } catch (error) {
-      console.error("ERROR:");
-      console.error(error.response ? error.response.data : error.message);
-      api.sendMessage("حدث خطأ أثناء معالجة الطلب.", event.sender.id).catch((err) => {
-        console.error(err);
+      console.error("Error during API request:", error.response ? error.response.data : error.message);
+      api.sendMessage("حدث خطأ أثناء معالجة الطلب. يرجى المحاولة لاحقًا.", event.sender.id).catch((err) => {
+        console.error("Error sending error message:", err);
       });
     }
   }
