@@ -1,7 +1,5 @@
 const { gpt } = require("gpti");
-
-// مصفوفة لتخزين المحادثات
-const conversations = {};
+let conversations = {};
 
 module.exports.config = {
   name: "صخر",
@@ -14,40 +12,48 @@ module.exports.config = {
   cooldown: 3,
 };
 
-module.exports.run = async function ({ event, args, api }) {
-  const userId = event.sender.id; // التعرف على المستخدم من الـ ID
-  const userMessage = args.join(" "); // رسالة المستخدم
-
-  // التأكد من وجود سجل المحادثة للمستخدم
-  if (!conversations[userId]) {
-    conversations[userId] = []; // إنشاء سجل جديد للمستخدم
+module.exports.run = async function ({ event, args }) {
+  let senderId = event.sender.id;
+  
+  // Initialize conversation for the user if not exists
+  if (!conversations[senderId]) {
+    conversations[senderId] = [];
   }
 
-  // إضافة رسالة المستخدم إلى المحادثة
-  conversations[userId].push({ role: "user", content: userMessage });
+  if (event.type === "message") {
+    let prompt = args.join(" ");
 
-  try {
-    // إرسال الطلب إلى GPT
-    const data = await gpt.v1({
-      messages: conversations[userId], // استخدام المحادثة الكاملة
-      prompt: userMessage,
-      model: "GPT-4",
-      markdown: false,
+    
+    conversations[senderId].push({ role: "user", content: prompt });
+
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
     });
 
-    const botResponse = data.gpt; // رد الروبوت
 
-    // إضافة رد الروبوت إلى المحادثة
-    conversations[userId].push({ role: "assistant", content: botResponse });
+    conversations[senderId].push({ role: "assistant", content: data.gpt });
 
-    // إرسال رد الروبوت إلى المستخدم
-    api.sendMessage(botResponse, userId).catch((err) => {
-      console.error(err);
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
     });
-  } catch (error) {
-    console.error("Error:", error);
-    api.sendMessage("حدث خطأ أثناء معالجة الطلب. حاول مرة أخرى لاحقًا.", userId).catch((err) => {
-      console.error(err);
+
+  } else if (event.type === "message_reply") {
+    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
+
+     conversations[senderId].push({ role: "user", content: prompt });
+
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
+
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
     });
   }
 };
