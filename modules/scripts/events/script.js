@@ -32,7 +32,7 @@ module.exports.run = async function({ event, args }) {
                   type: 'postback',
                     title: `اوامر`,
                     payload: 'HELP_PAYLOAD'
-                  }
+                  
                   }
                 ]
               }
