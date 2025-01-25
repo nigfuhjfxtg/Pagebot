@@ -20,8 +20,8 @@ module.exports.run = async function({ event, args }) {
             template_type: 'generic',
             elements: [
               {
-                title: 'Hey there newbie!', // The title of the generic message
-                subtitle: 'Thank you for using Pagebot. Leave a like on my repository and support my work.', // The subtitle of the message
+                title: 'مرحبا ايها المستخدم!', // The title of the generic message
+                subtitle: 'شكرا لك لأستخدامك زيرو جيبيتي 🎉 اتمنى منك دعمنا بلايك للصفحة.', // The subtitle of the message
                 image_url: 'https://i.ibb.co/dJzSv5Q/pagebot.jpg', // The image URL
                 buttons: [
                   {
