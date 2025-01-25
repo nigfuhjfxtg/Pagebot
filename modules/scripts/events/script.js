@@ -31,7 +31,7 @@ module.exports.run = async function({ event, args }) {
                   },
                   {
                     type: 'postback',
-                    title: `${PREFIX}help`,
+                    title: `اوامر`,
                     payload: 'HELP_PAYLOAD'
                   }
                 ]
