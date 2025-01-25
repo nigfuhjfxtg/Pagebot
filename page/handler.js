@@ -33,8 +33,15 @@ module.exports = async function (event) {
       "لونا": now
     };
 
+    // التحقق من وجود نص مرسل (تعديل 2)
     let prompt = event.message?.text || "";
-    if (event.type === "message_reply") {
+    if (!prompt.trim()) {
+      api.sendMessage("النص المرسل فارغ، من فضلك أرسل نصاً لتلقي الرد.", event.sender.id);
+      return;
+    }
+
+    // تحسين التعامل مع الرسائل من النوع reply (تعديل 5)
+    if (event.type === "message_reply" && event.message.reply_to?.text) {
       prompt = `Message: "${prompt}"\n\nReplying to: ${event.message.reply_to.text}`;
     }
 
@@ -50,7 +57,9 @@ module.exports = async function (event) {
         console.log(err);
       });
     } catch (error) {
+      // تحسين الرد عند حدوث خطأ (تعديل 3)
       console.error("Error while processing GPT response:", error);
+      api.sendMessage("عذرًا، حدث خطأ أثناء معالجة الطلب. حاول مرة أخرى لاحقًا.", event.sender.id);
     }
   }
 };
