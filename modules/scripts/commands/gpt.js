@@ -1,4 +1,5 @@
 const { gpt } = require("gpti");
+let conversations = {};
 
 module.exports.config = {
   name: "صخر",
@@ -12,30 +13,46 @@ module.exports.config = {
 };
 
 module.exports.run = async function ({ event, args }) {
+  let senderId = event.sender.id;
+  
+  // Initialize conversation for the user if not exists
+  if (!conversations[senderId]) {
+    conversations[senderId] = [];
+  }
+
   if (event.type === "message") {
     let prompt = args.join(" ");
 
+    
+    conversations[senderId].push({ role: "user", content: prompt });
+
     let data = await gpt.v1({
-        messages: [],
-        prompt: prompt,
+        messages: conversations[senderId],
         model: "GPT-4",
         markdown: false
     });
 
-    api.sendMessage(data.gpt, event.sender.id).catch(err => {
+
+    conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
         console.log(err);
     });
+
   } else if (event.type === "message_reply") {
     let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
 
+     conversations[senderId].push({ role: "user", content: prompt });
+
     let data = await gpt.v1({
-        messages: [],
-        prompt: prompt,
+        messages: conversations[senderId],
         model: "GPT-4",
         markdown: false
     });
 
-    api.sendMessage(data.gpt, event.sender.id).catch(err => {
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
         console.log(err);
     });
   }
