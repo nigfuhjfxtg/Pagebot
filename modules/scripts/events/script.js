@@ -30,7 +30,7 @@ module.exports.run = async function({ event, args }) {
                     title: 'حساب المطور'
                      },{
                   type: 'postback',
-                    title: `اوامر`,
+                    title: `بدء الاستخدام`,
                     payload: 'HELP_PAYLOAD'
                   
                   }
