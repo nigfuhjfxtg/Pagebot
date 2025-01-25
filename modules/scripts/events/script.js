@@ -22,7 +22,7 @@ module.exports.run = async function({ event, args }) {
               {
                 title: 'مرحبا ايها المستخدم!', // The title of the generic message
                 subtitle: 'شكرا لك لأستخدامك زيرو جيبيتي 🎉 اتمنى منك دعمنا بلايك للصفحة.', // The subtitle of the message
-                image_url: 'https://i.ibb.co/dJzSv5Q/pagebot.jpg', // The image URL
+                image_url: 'https://ibb.co/JtJh1T4', // The image URL
                 buttons: [
                   {
                     type: 'web_url',
