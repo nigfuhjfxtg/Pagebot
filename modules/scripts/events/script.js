@@ -26,8 +26,8 @@ module.exports.run = async function({ event, args }) {
                 buttons: [
                   {
                     type: 'web_url',
-                    url: 'https://www.facebook.com/yandeva.me',
-                    title: 'Check my Profile'
+                    url: 'https://www.facebook.com/61567181097397',
+                    title: 'حساب المطور'
                   },
                   {
                     type: 'postback',
