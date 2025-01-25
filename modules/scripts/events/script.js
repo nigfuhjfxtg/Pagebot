@@ -28,8 +28,8 @@ module.exports.run = async function({ event, args }) {
                     type: 'web_url',
                     url: 'https://www.facebook.com/61567181097397',
                     title: 'حساب المطور'
-                  },
-                  {
+                  }
+              
                     
                   }
                 ]
