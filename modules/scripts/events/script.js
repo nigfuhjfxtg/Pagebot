@@ -42,6 +42,6 @@ module.exports.run = async function({ event, args }) {
     // إعادة تعيين `enter` بعد 10 ثوانٍ حتى يعمل مع مستخدمين آخرين
     setTimeout(() => {
       enter = false;
-    }, 10000);
+    }, 1000000);
   }
 };
