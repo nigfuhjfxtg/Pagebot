@@ -10,6 +10,7 @@ module.exports.config = {
   description: "يقوم بتنزيل فيديوهات فيسبوك عند إرسال رابط",
   usePrefix: true,
   cooldown: 0,
+  adminOnly: false // ✅ تمت إضافة الخاصية المطلوبة
 };
 
 module.exports.run = async function ({ event, args, api }) {
