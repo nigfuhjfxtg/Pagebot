@@ -20,19 +20,14 @@ module.exports.run = async function({ event, args }) {
             template_type: 'generic',
             elements: [
               {
-                title: 'مرحبا ايها المستخدم!', // The title of the generic message
-                subtitle: 'شكرا لك لأستخدامك زيرو جيبيتي 🎉 اتمنى منك دعمنا بلايك للصفحة.', // The subtitle of the message
-                image_url: 'https://i.ibb.co/8gf7KLcw/20250127-215950.jpg', // The image URL
+                title: 'مرحبا ايها المستخدم!', // عنوان الرسالة
+                subtitle: 'شكرا لك لأستخدامك زيرو جيبيتي 🎉 اتمنى منك دعمنا بلايك للصفحة.', // نص الترحيب
+                image_url: 'https://i.ibb.co/8gf7KLcw/20250127-215950.jpg', // رابط الصورة
                 buttons: [
                   {
                     type: 'web_url',
                     url: 'https://www.facebook.com/61567181097397',
                     title: 'حساب المطور'
-                     },{
-                  type: 'postback',
-                    title: `بدء الاستخدام`,
-                    payload: 'HELP_PAYLOAD'
-                  
                   }
                 ]
               }
@@ -41,15 +36,12 @@ module.exports.run = async function({ event, args }) {
         }
       }
     });
-    enter = true;
-  };
 
-  /** EVENT TYPES
-   * postback
-   * quick_reply
-   * message_reaction
-   * message_reply
-   * message
-   * mark_as_seen
-   * @YanMaglinte **/
+    enter = true; // تعيين `enter` لمنع التكرار
+
+    // إعادة تعيين `enter` بعد 10 ثوانٍ حتى يعمل مع مستخدمين آخرين
+    setTimeout(() => {
+      enter = false;
+    }, 10000);
+  }
 };
