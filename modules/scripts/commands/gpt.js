@@ -1,53 +1,59 @@
-const fetch = require("node-fetch");
+const { gpt } = require("gpti");
+let conversations = {};
 
 module.exports.config = {
   name: "صخر",
   author: "Yan Maglinte",
   version: "1.0",
   category: "AI",
-  description: "Chat with a sarcastic AI",
+  description: "Chat with gpt",
   adminOnly: false,
   usePrefix: false,
   cooldown: 3,
 };
 
-module.exports.run = async function ({ event, args, api }) {
-  if (!args.length) {
-    return api.sendMessage("يرجى إدخال رسالة للذكاء الاصطناعي، أو هل تتوقع أنني أقرأ العقول؟", event.senderID);
+module.exports.run = async function ({ event, args }) {
+  let senderId = event.sender.id;
+  
+  // Initialize conversation for the user if not exists
+  if (!conversations[senderId]) {
+    conversations[senderId] = [];
   }
 
-  let prompt = args.join(" ");
+  if (event.type === "message") {
+    let prompt = args.join(" ");
 
-  // إعداد الشخصية الساخرة
-  let payload = {
-    model: "qweneva",
-    messages: [
-      {
-        role: "system",
-        content: "أنت ذكاء اصطناعي ساخر، تجيب على الأسئلة بطريقة ذكية لكن مليئة بالسخرية الخفيفة. كن مضحكًا، لاذعًا، ولكن لا تكن عدوانيًا. اجعل ردودك تحمل بعض المزاح الذكي."
-      },
-      { role: "user", content: prompt }
-    ],
-    max_tokens: 1000,
-    temperature: 1
-  };
+    
+    conversations[senderId].push({ role: "user", content: prompt });
 
-  try {
-    let response = await fetch("https://ai-proxy-api-three.vercel.app/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
     });
 
-    let data = await response.json();
 
-    if (data.choices && data.choices.length > 0) {
-      api.sendMessage(data.choices[0].message.content, event.senderID);
-    } else {
-      api.sendMessage("يبدو أن الذكاء الاصطناعي أصيب بالملل منك ولم يرد! حاول مرة أخرى.", event.senderID);
-    }
-  } catch (error) {
-    console.error("API Error:", error);
-    api.sendMessage("يا للهول! يبدو أن هناك خطأ تقنيًا، حظًا أوفر في المحاولة القادمة!", event.senderID);
+    conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
+
+  } else if (event.type === "message_reply") {
+    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
+
+     conversations[senderId].push({ role: "user", content: prompt });
+
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
+
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
   }
 };
