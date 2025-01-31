@@ -1,40 +1,59 @@
-const axios = require('axios');
+const { gpt } = require("gpti");
+let conversations = {};
 
 module.exports.config = {
   name: "صخر",
   author: "Yan Maglinte",
   version: "1.0",
   category: "AI",
-  description: "Chat with Blackbox AI",
+  description: "Chat with gpt",
   adminOnly: false,
   usePrefix: false,
   cooldown: 3,
 };
 
-module.exports.run = async function ({ event, args, api }) {
-  let prompt = args.join(" ");
+module.exports.run = async function ({ event, args }) {
+  let senderId = event.sender.id;
+  
+  // Initialize conversation for the user if not exists
+  if (!conversations[senderId]) {
+    conversations[senderId] = [];
+  }
 
-  const url = "https://www.blackbox.ai/api/chat";
-  const data = {
-    id: "BNAU61V",
-    messages: [{ id: "BNAU61V", content: prompt, role: "user" }],
-    agentMode: {},
-    validated: "00f37b34-a166-4efb-bce5-1312d87f2f94",
-  };
+  if (event.type === "message") {
+    let prompt = args.join(" ");
 
-  const headers = {
-    "Content-Type": "application/json",
-    Accept: "*/*",
-    Origin: "https://www.blackbox.ai",
-    Referer: "https://www.blackbox.ai/",
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-  };
+    
+    conversations[senderId].push({ role: "user", content: prompt });
 
-  try {
-    let response = await axios.post(url, data, { headers });
-    api.sendMessage(response.data.message, event.sender.id);
-  } catch (error) {
-    console.log(error);
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
+
+
+    conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
+
+  } else if (event.type === "message_reply") {
+    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
+
+     conversations[senderId].push({ role: "user", content: prompt });
+
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
+
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
+
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
   }
 };
