@@ -22,6 +22,9 @@
     "fontstyles": "^1.1.2",
     "fs-extra": "^11.2.0",
     "gpti": "^2.1.8",
-    "gradient-string": "^2.0.2"
+    "gradient-string": "^2.0.2",
+    
+  "node-fetch": "^2.6.1"
+    
   }
 }
