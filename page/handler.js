@@ -22,7 +22,9 @@ module.exports = async function (event) {
   };
 
   // Extract command text and arguments from the event
+  const messageText = event.message?.text || event.postback?.title || "";
   const [rawCommandName, ...args] = messageText.split(" ");
+  
   for (const file of commandFiles) {
     const commandPath = path.join(modulesPath, file);
     const command = require(commandPath);
