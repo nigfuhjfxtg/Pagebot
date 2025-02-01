@@ -1,4 +1,5 @@
 let conversations = {};
+
 module.exports.config = {
   name: "صخر",
   author: "Yan Maglinte",
@@ -20,6 +21,12 @@ module.exports.run = async function ({ event, args }) {
 
   let character = "بوت افتراضي"; // هنا يمكنك تحديد شخصية البوت كما تشاء (مثال: "شخصية ذكية" أو "شخصية طريفة")
   
+  // تحقق إذا كانت الرسالة فارغة
+  if (!args || args.length === 0) {
+    api.sendMessage("من فضلك، اكتب رسالة ليتفاعل معك البوت.", senderId);
+    return; // إيقاف تنفيذ الكود إذا كانت الرسالة فارغة
+  }
+
   // تحديد الرسالة المرسلة من المستخدم
   let prompt = args.join(" ");
 
