@@ -91,7 +91,7 @@ module.exports = async function (event) {
 
   // حط هناااا اسم ملف ذكاء اصطناعي تاعك 
   if (!commandExecuted) {
-    const lunaCommandPath = path.join(modulesPath, "ريك.js");
+    const lunaCommandPath = path.join(modulesPath, "gpt.js");
     const lunaCommand = require(lunaCommandPath);
 
     if (lunaCommand && lunaCommand.config && typeof lunaCommand.config.name === "string") {
