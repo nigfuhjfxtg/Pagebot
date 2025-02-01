@@ -19,6 +19,11 @@ module.exports.config = {
 };
 
 module.exports.run = async function ({ event, api, args }) {
+  if (!api || !api.sendMessage) {
+    console.error("❌ خطأ: كائن API غير معرف!");
+    return;
+  }
+
   let senderId = event.senderID;
   let prompt = args.join(" ").trim();
 
@@ -33,7 +38,6 @@ module.exports.run = async function ({ event, api, args }) {
     return api.sendMessage({ sticker: randomSticker }, event.threadID, event.messageID);
   }
 
-  // تهيئة المحادثة إذا لم تكن موجودة
   if (!conversations[senderId]) {
     conversations[senderId] = [];
   }
@@ -49,12 +53,17 @@ module.exports.run = async function ({ event, api, args }) {
 
     return api.sendMessage(reply, event.threadID, event.messageID);
   } catch (error) {
-    console.error("API Error:", error);
-    return api.sendMessage("حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
+    console.error("❌ خطأ في API:", error);
+    return api.sendMessage("⚠️ حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
   }
 };
 
 module.exports.handleReply = async function ({ api, event, handleReply }) {
+  if (!api || !api.sendMessage) {
+    console.error("❌ خطأ: كائن API غير معرف!");
+    return;
+  }
+
   let senderId = event.senderID;
   let userReply = event.body.trim();
 
@@ -73,7 +82,7 @@ module.exports.handleReply = async function ({ api, event, handleReply }) {
 
     return api.sendMessage(reply, event.threadID, event.messageID);
   } catch (error) {
-    console.error("API Error:", error);
-    return api.sendMessage("حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
+    console.error("❌ خطأ في API:", error);
+    return api.sendMessage("⚠️ حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
   }
 };
