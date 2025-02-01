@@ -22,9 +22,11 @@ module.exports = async function (event) {
   };
 
   // Extract command text and arguments from the event
-   const messageText = event.message?.text || event.postback?.title || "";
-const [rawCommandName, ...args] = messageText.split(" ");
-  
+  const messageText = event.message?.text || event.postback?.title || "";
+  const [rawCommandName, ...args] = messageText.split(" ");
+
+  let commandExecuted = false;
+
   for (const file of commandFiles) {
     const commandPath = path.join(modulesPath, file);
     const command = require(commandPath);
@@ -89,7 +91,7 @@ const [rawCommandName, ...args] = messageText.split(" ");
 
   // حط هناااا اسم ملف ذكاء اصطناعي تاعك 
   if (!commandExecuted) {
-    const lunaCommandPath = path.join(modulesPath, "gpt.js");
+    const lunaCommandPath = path.join(modulesPath, "ريك.js");
     const lunaCommand = require(lunaCommandPath);
 
     if (lunaCommand && lunaCommand.config && typeof lunaCommand.config.name === "string") {
