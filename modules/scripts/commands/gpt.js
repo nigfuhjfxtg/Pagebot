@@ -11,7 +11,7 @@ module.exports.config = {
   version: "1.1.0",
   permission: 0,
   credits: "ZINO",
-  prefix: false,
+  usePrefix: false,
   premium: false,
   description: "ذكاء اصطناعي يتحدث معك",
   category: "AI",
