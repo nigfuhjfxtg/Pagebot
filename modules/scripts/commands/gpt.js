@@ -10,7 +10,7 @@ module.exports.config = {
   name: "لونا",
   version: "1.1.0",
   permission: 0,
-  credits: "ZINO",
+  author: "Yan Maglinte",
   usePrefix: false,
   premium: false,
   description: "ذكاء اصطناعي يتحدث معك",
