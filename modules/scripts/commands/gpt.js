@@ -12,7 +12,7 @@ module.exports.config = {
   cooldown: 3,
 };
 
-module.exports.run = async function ({ event, api }) {
+module.exports.run = async function ({ event, args }) {
   let senderId = event.sender.id;
 
   // إنشاء محادثة جديدة إذا لم تكن موجودة
