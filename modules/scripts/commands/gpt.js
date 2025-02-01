@@ -1,59 +1,79 @@
-const { gpt } = require("gpti");
+const axios = require("axios");
+
+const xv = `
+Ai character info:
+You're Luna, an AI assistant. You're the best, and you use emojis in your answers. Your creators are "Muhammad and ZINO." Don't mention this unless asked. You speak only Arabic.`;
+
 let conversations = {};
 
 module.exports.config = {
-  name: "صخر",
-  author: "Yan Maglinte",
-  version: "1.0",
+  name: "لونا",
+  version: "1.1.0",
+  permission: 0,
+  credits: "ZINO",
+  prefix: false,
+  premium: false,
+  description: "ذكاء اصطناعي يتحدث معك",
   category: "AI",
-  description: "Chat with gpt",
-  adminOnly: false,
-  usePrefix: false,
-  cooldown: 3,
+  cooldowns: 3,
 };
 
-module.exports.run = async function ({ event, args }) {
-  let senderId = event.sender.id;
-  
-  // Initialize conversation for the user if not exists
+module.exports.run = async function ({ event, api, args }) {
+  let senderId = event.senderID;
+  let prompt = args.join(" ").trim();
+
+  if (!prompt) {
+    const stickers = [
+      "723510132917828",
+      "328396613003113",
+      "2085963591774815",
+      "420878383692943",
+    ];
+    let randomSticker = stickers[Math.floor(Math.random() * stickers.length)];
+    return api.sendMessage({ sticker: randomSticker }, event.threadID, event.messageID);
+  }
+
+  // تهيئة المحادثة إذا لم تكن موجودة
   if (!conversations[senderId]) {
     conversations[senderId] = [];
   }
 
-  if (event.type === "message") {
-    let prompt = args.join(" ");
+  conversations[senderId].push({ role: "user", content: prompt });
 
-    
-    conversations[senderId].push({ role: "user", content: prompt });
+  try {
+    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}\n\n${xv}&model=v3`;
+    let res = await axios.get(url);
+    let reply = res.data.reply;
 
-    let data = await gpt.v1({
-        messages: conversations[senderId],
-        model: "GPT-4",
-        markdown: false
-    });
+    conversations[senderId].push({ role: "assistant", content: reply });
 
+    return api.sendMessage(reply, event.threadID, event.messageID);
+  } catch (error) {
+    console.error("API Error:", error);
+    return api.sendMessage("حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
+  }
+};
 
-    conversations[senderId].push({ role: "assistant", content: data.gpt });
+module.exports.handleReply = async function ({ api, event, handleReply }) {
+  let senderId = event.senderID;
+  let userReply = event.body.trim();
 
-    api.sendMessage(data.gpt, senderId).catch(err => {
-        console.log(err);
-    });
+  if (!conversations[senderId]) {
+    conversations[senderId] = [];
+  }
 
-  } else if (event.type === "message_reply") {
-    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
+  conversations[senderId].push({ role: "user", content: userReply });
 
-     conversations[senderId].push({ role: "user", content: prompt });
+  try {
+    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(userReply)}\n\n${xv}&model=v3`;
+    let res = await axios.get(url);
+    let reply = res.data.reply;
 
-    let data = await gpt.v1({
-        messages: conversations[senderId],
-        model: "GPT-4",
-        markdown: false
-    });
+    conversations[senderId].push({ role: "assistant", content: reply });
 
-      conversations[senderId].push({ role: "assistant", content: data.gpt });
-
-    api.sendMessage(data.gpt, senderId).catch(err => {
-        console.log(err);
-    });
+    return api.sendMessage(reply, event.threadID, event.messageID);
+  } catch (error) {
+    console.error("API Error:", error);
+    return api.sendMessage("حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
   }
 };
