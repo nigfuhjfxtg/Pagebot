@@ -6,7 +6,7 @@ module.exports.config = {
   author: "Yan Maglinte",
   version: "1.0",
   category: "AI",
-  description: "Chat with GPT",
+  description: "Chat with gpt",
   adminOnly: false,
   usePrefix: false,
   cooldown: 3,
@@ -14,44 +14,46 @@ module.exports.config = {
 
 module.exports.run = async function ({ event, args }) {
   let senderId = event.sender.id;
-
-  // إنشاء محادثة جديدة إذا لم تكن موجودة
+  
+  // Initialize conversation for the user if not exists
   if (!conversations[senderId]) {
     conversations[senderId] = [];
   }
 
   if (event.type === "message") {
-    let prompt = event.body; // استخدام نص الرسالة بالكامل
+    let prompt = args.join(" ");
 
+    
     conversations[senderId].push({ role: "user", content: prompt });
 
     let data = await gpt.v1({
-      messages: conversations[senderId],
-      model: "GPT-4",
-      markdown: false
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
     });
+
 
     conversations[senderId].push({ role: "assistant", content: data.gpt });
 
     api.sendMessage(data.gpt, senderId).catch(err => {
-      console.log(err);
+        console.log(err);
     });
 
   } else if (event.type === "message_reply") {
-    let prompt = `Message: "${event.body}"\n\nReplying to: ${event.message.reply_to.text}`;
+    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
 
-    conversations[senderId].push({ role: "user", content: prompt });
+     conversations[senderId].push({ role: "user", content: prompt });
 
     let data = await gpt.v1({
-      messages: conversations[senderId],
-      model: "GPT-4",
-      markdown: false
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
     });
 
-    conversations[senderId].push({ role: "assistant", content: data.gpt });
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
 
     api.sendMessage(data.gpt, senderId).catch(err => {
-      console.log(err);
+        console.log(err);
     });
   }
 };
