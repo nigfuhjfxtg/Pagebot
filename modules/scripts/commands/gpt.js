@@ -38,7 +38,18 @@ module.exports.run = async function ({ event, args }) {
 
     try {
       let response = await fetch(url);
+
+      // التحقق من وجود الاستجابة الصحيحة
+      if (!response.ok) {
+        throw new Error('Failed to fetch from API');
+      }
+
       let data = await response.json();
+
+      // التحقق من وجود الرد في البيانات
+      if (!data || !data.response) {
+        throw new Error('Invalid response format');
+      }
 
       // إرسال الرد للبوت
       let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
@@ -47,7 +58,7 @@ module.exports.run = async function ({ event, args }) {
       api.sendMessage(botResponse, senderId);
     } catch (err) {
       console.log(err);
-      api.sendMessage("حدث خطأ أثناء التواصل مع البوت.", senderId);
+      api.sendMessage("حدث خطأ أثناء التواصل مع البوت. الرجاء المحاولة مرة أخرى.", senderId);
     }
   } else if (event.type === "message_reply") {
     let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
@@ -59,7 +70,18 @@ module.exports.run = async function ({ event, args }) {
 
     try {
       let response = await fetch(url);
+
+      // التحقق من وجود الاستجابة الصحيحة
+      if (!response.ok) {
+        throw new Error('Failed to fetch from API');
+      }
+
       let data = await response.json();
+
+      // التحقق من وجود الرد في البيانات
+      if (!data || !data.response) {
+        throw new Error('Invalid response format');
+      }
 
       // إرسال الرد للبوت
       let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
@@ -68,7 +90,7 @@ module.exports.run = async function ({ event, args }) {
       api.sendMessage(botResponse, senderId);
     } catch (err) {
       console.log(err);
-      api.sendMessage("حدث خطأ أثناء التواصل مع البوت.", senderId);
+      api.sendMessage("حدث خطأ أثناء التواصل مع البوت. الرجاء المحاولة مرة أخرى.", senderId);
     }
   }
 };
