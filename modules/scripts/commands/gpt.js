@@ -1,3 +1,4 @@
+let conversations = {};
 module.exports.config = {
   name: "صخر",
   author: "Yan Maglinte",
