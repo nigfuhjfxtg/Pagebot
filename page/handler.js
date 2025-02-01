@@ -23,8 +23,7 @@ module.exports = async function (event) {
 
   // Extract command text and arguments from the event
   const messageText = event.message?.text || event.postback?.title || "";
-  const [rawCommandName, ...args] = messageText.split(" ");
-
+const args = messageText.split(" "); // استخراج النص كاملاً في args
   let commandExecuted = false;
 
   for (const file of commandFiles) {
