@@ -22,7 +22,7 @@ module.exports.run = async function({ event, args }) {
               {
                 title: 'مرحبا ايها المستخدم!', // عنوان الرسالة
                 subtitle: 'شكرا لك لأستخدامك زيرو جيبيتي 🎉 اتمنى منك دعمنا بلايك للصفحة.', // نص الترحيب
-                image_url: 'https://i.ibb.co/8gf7KLcw/20250127-215950.jpg', // رابط الصورة
+                image_url: 'https://i.ibb.co/W415tgby/file-3-Cf-Ts-CEg-B2-Qd-Ne6v3k-Zk1o.webp', // رابط الصورة
                 buttons: [
                   {
                     type: 'web_url',
