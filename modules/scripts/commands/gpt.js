@@ -15,6 +15,7 @@ module.exports.config = {
   premium: false,
   description: "ذكاء اصطناعي يتحدث معك",
   category: "AI",
+  adminOnly: false,
   cooldowns: 3,
 };
 
