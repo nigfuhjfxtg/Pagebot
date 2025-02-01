@@ -1,89 +1,66 @@
-const axios = require("axios");
-
-const xv = `
-Ai character info:
-You're Luna, an AI assistant. You're the best, and you use emojis in your answers. Your creators are "Muhammad and ZINO." Don't mention this unless asked. You speak only Arabic.`;
-
-let conversations = {};
-
 module.exports.config = {
-  name: "لونا",
-  version: "1.1.0",
-  permission: 0,
+  name: "صخر",
   author: "Yan Maglinte",
-  usePrefix: false,
-  premium: false,
-  description: "ذكاء اصطناعي يتحدث معك",
+  version: "1.0",
   category: "AI",
+  description: "Chat with custom AI character",
   adminOnly: false,
-  cooldowns: 3,
+  usePrefix: false,
+  cooldown: 3,
 };
 
-module.exports.run = async function ({ event, api, args }) {
-  if (!api || !api.sendMessage) {
-    console.error("❌ خطأ: كائن API غير معرف!");
-    return;
-  }
-
-  let senderId = event.senderID;
-  let prompt = args.join(" ").trim();
-
-  if (!prompt) {
-    const stickers = [
-      "723510132917828",
-      "328396613003113",
-      "2085963591774815",
-      "420878383692943",
-    ];
-    let randomSticker = stickers[Math.floor(Math.random() * stickers.length)];
-    return api.sendMessage({ sticker: randomSticker }, event.threadID, event.messageID);
-  }
-
+module.exports.run = async function ({ event, args }) {
+  let senderId = event.sender.id;
+  
+  // Initialize conversation for the user if not exists
   if (!conversations[senderId]) {
     conversations[senderId] = [];
   }
 
-  conversations[senderId].push({ role: "user", content: prompt });
+  let character = "بوت افتراضي"; // هنا يمكنك تحديد شخصية البوت كما تشاء (مثال: "شخصية ذكية" أو "شخصية طريفة")
+  
+  // تحديد الرسالة المرسلة من المستخدم
+  let prompt = args.join(" ");
 
-  try {
-    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}\n\n${xv}&model=v3`;
-    let res = await axios.get(url);
-    let reply = res.data.reply;
+  if (event.type === "message") {
+    conversations[senderId].push({ role: "user", content: prompt });
 
-    conversations[senderId].push({ role: "assistant", content: reply });
+    // بناء الرابط مع الرسالة والشخصية
+    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}&character=${encodeURIComponent(character)}&model=v3`;
 
-    return api.sendMessage(reply, event.threadID, event.messageID);
-  } catch (error) {
-    console.error("❌ خطأ في API:", error);
-    return api.sendMessage("⚠️ حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
-  }
-};
+    try {
+      let response = await fetch(url);
+      let data = await response.json();
 
-module.exports.handleReply = async function ({ api, event, handleReply }) {
-  if (!api || !api.sendMessage) {
-    console.error("❌ خطأ: كائن API غير معرف!");
-    return;
-  }
+      // إرسال الرد للبوت
+      let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
+      conversations[senderId].push({ role: "assistant", content: botResponse });
 
-  let senderId = event.senderID;
-  let userReply = event.body.trim();
+      api.sendMessage(botResponse, senderId);
+    } catch (err) {
+      console.log(err);
+      api.sendMessage("حدث خطأ أثناء التواصل مع البوت.", senderId);
+    }
+  } else if (event.type === "message_reply") {
+    let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
 
-  if (!conversations[senderId]) {
-    conversations[senderId] = [];
-  }
+    conversations[senderId].push({ role: "user", content: prompt });
 
-  conversations[senderId].push({ role: "user", content: userReply });
+    // بناء الرابط مع الرسالة والشخصية
+    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}&character=${encodeURIComponent(character)}&model=v3`;
 
-  try {
-    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(userReply)}\n\n${xv}&model=v3`;
-    let res = await axios.get(url);
-    let reply = res.data.reply;
+    try {
+      let response = await fetch(url);
+      let data = await response.json();
 
-    conversations[senderId].push({ role: "assistant", content: reply });
+      // إرسال الرد للبوت
+      let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
+      conversations[senderId].push({ role: "assistant", content: botResponse });
 
-    return api.sendMessage(reply, event.threadID, event.messageID);
-  } catch (error) {
-    console.error("❌ خطأ في API:", error);
-    return api.sendMessage("⚠️ حدث خطأ أثناء محاولة الحصول على الرد. حاول لاحقًا.", event.threadID, event.messageID);
+      api.sendMessage(botResponse, senderId);
+    } catch (err) {
+      console.log(err);
+      api.sendMessage("حدث خطأ أثناء التواصل مع البوت.", senderId);
+    }
   }
 };
