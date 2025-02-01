@@ -1,3 +1,4 @@
+const { gpt } = require("gpti");
 let conversations = {};
 
 module.exports.config = {
@@ -5,7 +6,7 @@ module.exports.config = {
   author: "Yan Maglinte",
   version: "1.0",
   category: "AI",
-  description: "Chat with custom AI character",
+  description: "Chat with gpt",
   adminOnly: false,
   usePrefix: false,
   cooldown: 3,
@@ -19,78 +20,40 @@ module.exports.run = async function ({ event, args }) {
     conversations[senderId] = [];
   }
 
-  let character = "بوت افتراضي"; // هنا يمكنك تحديد شخصية البوت كما تشاء (مثال: "شخصية ذكية" أو "شخصية طريفة")
-  
-  // تحقق إذا كانت الرسالة فارغة
-  if (!args || args.length === 0) {
-    api.sendMessage("من فضلك، اكتب رسالة ليتفاعل معك البوت.", senderId);
-    return; // إيقاف تنفيذ الكود إذا كانت الرسالة فارغة
-  }
-
-  // تحديد الرسالة المرسلة من المستخدم
-  let prompt = args.join(" ");
-
   if (event.type === "message") {
+    let prompt = args.join(" ");
+
+    
     conversations[senderId].push({ role: "user", content: prompt });
 
-    // بناء الرابط مع الرسالة والشخصية
-    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}&character=${encodeURIComponent(character)}&model=v3`;
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
 
-    try {
-      let response = await fetch(url);
 
-      // التحقق من وجود الاستجابة الصحيحة
-      if (!response.ok) {
-        throw new Error('Failed to fetch from API');
-      }
+    conversations[senderId].push({ role: "assistant", content: data.gpt });
 
-      let data = await response.json();
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
 
-      // التحقق من وجود الرد في البيانات
-      if (!data || !data.response) {
-        throw new Error('Invalid response format');
-      }
-
-      // إرسال الرد للبوت
-      let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
-      conversations[senderId].push({ role: "assistant", content: botResponse });
-
-      api.sendMessage(botResponse, senderId);
-    } catch (err) {
-      console.log(err);
-      api.sendMessage("حدث خطأ أثناء التواصل مع البوت. الرجاء المحاولة مرة أخرى.", senderId);
-    }
   } else if (event.type === "message_reply") {
     let prompt = `Message: "${args.join(" ")}\n\nReplying to: ${event.message.reply_to.text}`;
 
-    conversations[senderId].push({ role: "user", content: prompt });
+     conversations[senderId].push({ role: "user", content: prompt });
 
-    // بناء الرابط مع الرسالة والشخصية
-    let url = `https://openai-rest-api.vercel.app/hercai?ask=${encodeURIComponent(prompt)}&character=${encodeURIComponent(character)}&model=v3`;
+    let data = await gpt.v1({
+        messages: conversations[senderId],
+        model: "GPT-4",
+        markdown: false
+    });
 
-    try {
-      let response = await fetch(url);
+      conversations[senderId].push({ role: "assistant", content: data.gpt });
 
-      // التحقق من وجود الاستجابة الصحيحة
-      if (!response.ok) {
-        throw new Error('Failed to fetch from API');
-      }
-
-      let data = await response.json();
-
-      // التحقق من وجود الرد في البيانات
-      if (!data || !data.response) {
-        throw new Error('Invalid response format');
-      }
-
-      // إرسال الرد للبوت
-      let botResponse = data.response;  // تأكد من أن "response" هو المفتاح الذي يعيد الـ API في الرد.
-      conversations[senderId].push({ role: "assistant", content: botResponse });
-
-      api.sendMessage(botResponse, senderId);
-    } catch (err) {
-      console.log(err);
-      api.sendMessage("حدث خطأ أثناء التواصل مع البوت. الرجاء المحاولة مرة أخرى.", senderId);
-    }
+    api.sendMessage(data.gpt, senderId).catch(err => {
+        console.log(err);
+    });
   }
 };
